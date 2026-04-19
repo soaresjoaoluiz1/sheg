@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env.local
+.env.production
+prisma/dev.db*
+public/uploads
+*.log
+.DS_Store
+.vscode
+.idea
+README.md
+GUIA-USO.md
+RESUMO.md
