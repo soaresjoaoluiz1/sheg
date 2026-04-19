@@ -1,0 +1,460 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum AdminRole {
+  ADMIN
+  SINDICO
+  RONDA
+  ADVOGADO
+}
+
+enum PackageStatus {
+  PENDING
+  DELIVERED
+}
+
+enum DeliveryType {
+  PACKAGE
+  FAST_DELIVERY
+  VISITOR
+}
+
+model Condominium {
+  id              String   @id @default(cuid())
+  name            String
+  cnpj            String?
+  email           String?
+  billingEmail    String?
+  whatsapp        String?
+  sindicoName     String?
+  sindicoEmail    String?
+  sindicoWhatsapp String?
+  address         String?
+  unitCount       Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  adminUsers   AdminUserCondominium[]
+  residences   Residence[]
+  residents    Resident[]
+  packages     Package[]
+  settings     Setting[]
+  messages     MessageQueue[]
+  notices      Notice[]
+  occurrences  Occurrence[]
+  complaints   Complaint[]
+  vehicles     Vehicle[]
+  facilitisServices       FacilitisService[]
+  facilitisCollaborators  FacilitisCollaboratorCondo[]
+  advertisers  AdvertiserCondo[]
+  orders       Order[]
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String?
+  role         String   @default("ADMIN")
+  isMaster     Boolean  @default(false)
+  condoId      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  condominiums AdminUserCondominium[]
+}
+
+model AdminUserCondominium {
+  adminUserId   String
+  condominiumId String
+
+  adminUser   AdminUser   @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  condominium Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@id([adminUserId, condominiumId])
+}
+
+model Residence {
+  id        String   @id @default(cuid())
+  condoId   String
+  block     String?
+  tower     String?
+  number    String
+  createdAt DateTime @default(now())
+
+  condominium Condominium  @relation(fields: [condoId], references: [id], onDelete: Cascade)
+  residents   Resident[]
+  packages    Package[]
+  vehicles    Vehicle[]
+  occurrences Occurrence[] @relation("OffenderResidence")
+
+  @@index([condoId])
+}
+
+model Resident {
+  id           String   @id @default(cuid())
+  residenceId  String
+  condoId      String
+  name         String
+  whatsapp     String?
+  photo        String?
+  rg           String?
+  cpf          String?
+  email        String?
+  passwordHash String?
+  loginEnabled Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  residence   Residence   @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId])
+  @@index([residenceId])
+}
+
+model Package {
+  id            String    @id @default(cuid())
+  condoId       String
+  residenceId   String
+  status        String    @default("PENDING")
+  deliveryType  String    @default("PACKAGE")
+  courier       String?
+  trackingCode  String?
+  pickupCode    String?
+  arrivalDate   DateTime  @default(now())
+  deliveryDate  DateTime?
+  deliveryPhoto String?
+  releasePhoto  String?
+  deliveredTo   String?
+  createdAt     DateTime  @default(now())
+
+  condominium Condominium       @relation(fields: [condoId], references: [id], onDelete: Cascade)
+  residence   Residence         @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  reminders   PackageReminder[]
+
+  @@index([condoId, status])
+  @@index([residenceId])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  condoId   String
+  key       String
+  value     String
+  updatedAt DateTime @updatedAt
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@unique([condoId, key])
+}
+
+model MessageQueue {
+  id          String   @id @default(cuid())
+  condoId     String
+  status      String   @default("PENDING")
+  to          String
+  message     String
+  packageId   String?
+  residentId  String?
+  attempts    Int      @default(0)
+  lastError   String?
+  scheduledAt DateTime @default(now())
+  sentAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId, status])
+  @@index([scheduledAt])
+}
+
+model Notice {
+  id            String   @id @default(cuid())
+  condoId       String
+  title         String
+  body          String
+  photoUrl      String?
+  targetType    String   @default("condo")
+  targetId      String?
+  createdByName String?
+  createdAt     DateTime @default(now())
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId])
+  @@index([createdAt])
+}
+
+model PackageReminder {
+  id          String   @id @default(cuid())
+  packageId   String
+  hoursBucket Int
+  sentAt      DateTime @default(now())
+
+  package Package @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@unique([packageId, hoursBucket])
+}
+
+model Occurrence {
+  id                  String    @id @default(cuid())
+  condoId             String
+  title               String
+  description         String
+  status              String    @default("OPEN")
+  complainantName     String?
+  complainantUnit     String?
+  offenderUnit        String?
+  offenderResidenceId String?
+  photo               String?
+  notifiedAt          DateTime?
+  adminResponse       String?
+  voteCount           Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  condominium       Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+  offenderResidence Residence?  @relation("OffenderResidence", fields: [offenderResidenceId], references: [id], onDelete: SetNull)
+
+  @@index([condoId, status])
+  @@index([offenderResidenceId])
+  @@index([createdAt])
+}
+
+model Complaint {
+  id                 String   @id @default(cuid())
+  condoId            String
+  title              String
+  description        String
+  status             String   @default("aberta")
+  reporterName       String?
+  reporterBlock      String?
+  reporterTower      String?
+  reporterUnit       String?
+  reporterPhone      String?
+  targetResidentName String?
+  targetBlock        String?
+  targetTower        String?
+  targetUnit         String?
+  photoUrl           String?
+  adminNotes         String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId, status])
+  @@index([createdAt])
+}
+
+model Vehicle {
+  id           String   @id @default(cuid())
+  residenceId  String
+  condoId      String
+  model        String?
+  year         String?
+  plate        String?
+  platePhoto   String?
+  vehiclePhoto String?
+  createdAt    DateTime @default(now())
+
+  residence   Residence   @relation(fields: [residenceId], references: [id], onDelete: Cascade)
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId])
+  @@index([residenceId])
+}
+
+model FacilitisService {
+  id             String    @id @default(cuid())
+  condoId        String
+  title          String
+  status         String    @default("SCHEDULED")
+  scheduledStart DateTime?
+  collaborator   String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+
+  @@index([condoId, status])
+}
+
+model FacilitisCollaborator {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  phone     String?
+  email     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  condos FacilitisCollaboratorCondo[]
+}
+
+model FacilitisCollaboratorCondo {
+  collaboratorId String
+  condominiumId  String
+
+  collaborator FacilitisCollaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+  condominium  Condominium           @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@id([collaboratorId, condominiumId])
+}
+
+model AdCategory {
+  id        String   @id @default(cuid())
+  name      String
+  icon      String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  advertisers Advertiser[]
+
+  @@index([sortOrder])
+}
+
+model Advertiser {
+  id            String   @id @default(cuid())
+  name          String
+  categoryId    String?
+  phone         String?
+  whatsapp      String?
+  email         String?
+  website       String?
+  address       String?
+  description   String?
+  active        Boolean  @default(true)
+  passwordHash  String?
+  coverImage    String?
+  logo          String?
+  deliveryMode  String   @default("both")
+  deliveryFee   Float?
+  minOrder      Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category  AdCategory?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  condos    AdvertiserCondo[]
+  products  AdvertiserProduct[]
+  audits    AdsAudit[]
+  orders    Order[]
+
+  @@index([active])
+}
+
+model AdvertiserCondo {
+  advertiserId  String
+  condominiumId String
+
+  advertiser  Advertiser  @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  condominium Condominium @relation(fields: [condominiumId], references: [id], onDelete: Cascade)
+
+  @@id([advertiserId, condominiumId])
+}
+
+model AdvertiserProduct {
+  id           String   @id @default(cuid())
+  advertiserId String
+  name         String
+  description  String?
+  price        Float?
+  createdAt    DateTime @default(now())
+
+  advertiser Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+
+  @@index([advertiserId])
+}
+
+model AdsAudit {
+  id              String   @id @default(cuid())
+  advertiserId    String
+  name            String
+  description     String?
+  price           Float?
+  photos          String?
+  category        String?
+  visible         Boolean  @default(true)
+  isResident      Boolean  @default(false)
+  residentName    String?
+  block           String?
+  unit            String?
+  condoName       String?
+  extrasMode      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  advertiser Advertiser @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+
+  @@index([advertiserId])
+  @@index([visible])
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  condoId         String
+  advertiserId    String?
+  orderNumber     String?
+  status          String   @default("pending")
+  deliveryMode    String   @default("delivery")
+  tower           String?
+  block           String?
+  unit            String?
+  schedule        String?
+  additionalInfo  String?
+  items           String?
+  total           Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  condominium Condominium @relation(fields: [condoId], references: [id], onDelete: Cascade)
+  advertiser  Advertiser? @relation(fields: [advertiserId], references: [id], onDelete: SetNull)
+
+  @@index([condoId, status])
+  @@index([createdAt])
+}
+
+model Lead {
+  id                String    @id @default(cuid())
+  name              String
+  city              String?
+  state             String?
+  role              String?
+  contact           String?
+  company           String?
+  monthlyBilling    Float?
+  projectedRevenue  Float?
+  referralSource    String?
+  testStart         DateTime?
+  testDays           Int?
+  paymentDay        Int?
+  contacted         Boolean   @default(false)
+  notes             String?
+  stage             String    @default("prospeccao")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([stage])
+  @@index([createdAt])
+}
+
+model MapPin {
+  id        String   @id @default(cuid())
+  city      String
+  state     String
+  lat       Float
+  lng       Float
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([active])
+}
