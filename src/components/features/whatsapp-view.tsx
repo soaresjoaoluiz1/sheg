@@ -49,13 +49,13 @@ const blockSchema = z.object({
 type BlockData = z.infer<typeof blockSchema>;
 
 async function fetchSetting(key: string) {
-  const res = await fetch(`/api/settings?key=${key}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/settings?key=${key}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).value;
 }
 
 async function saveSetting(key: string, value: unknown) {
-  const res = await fetch("/api/settings", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/settings", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ key, value }),
@@ -197,7 +197,7 @@ function BlockPanel() {
 async function fetchQueue(status: string): Promise<Message[]> {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
-  const res = await fetch(`/api/message-queue?${params}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/message-queue?${params}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Message[];
 }
@@ -215,7 +215,7 @@ function QueuePanel() {
 
   const dispatch = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/message-queue", { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/message-queue", { method: "POST" });
       return await res.json();
     },
     onSuccess: (data) => {
@@ -226,7 +226,7 @@ function QueuePanel() {
 
   const retry = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/message-queue/${id}`, { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/message-queue/${id}`, { method: "POST" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => {
@@ -237,7 +237,7 @@ function QueuePanel() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      await fetch(`/api/message-queue/${id}`, { method: "DELETE" });
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/message-queue/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
       toast.success("Removida");
@@ -355,7 +355,7 @@ function EditRecipientDialog({
   async function submit() {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/message-queue/${message.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/message-queue/${message.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ to }),

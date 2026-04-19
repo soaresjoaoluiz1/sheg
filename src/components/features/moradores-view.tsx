@@ -64,13 +64,13 @@ function unitLabel(r: Residence) {
 async function fetchResidents(q: string) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
-  const res = await fetch(`/api/residents${params.size ? `?${params}` : ""}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/residents${params.size ? `?${params}` : ""}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Resident[];
 }
 
 async function fetchResidences() {
-  const res = await fetch("/api/residences");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Residence[];
 }
@@ -93,7 +93,7 @@ export function MoradoresView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/residents/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/residents/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => {

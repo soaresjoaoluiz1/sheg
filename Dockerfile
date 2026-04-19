@@ -9,6 +9,8 @@ RUN npm ci
 
 FROM base AS builder
 WORKDIR /app
+ARG NEXT_PUBLIC_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=$NEXT_PUBLIC_BASE_PATH
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate

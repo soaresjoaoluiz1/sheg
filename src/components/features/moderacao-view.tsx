@@ -49,7 +49,7 @@ type EditForm = z.infer<typeof editSchema>;
 async function fetchAudits(visible: string): Promise<Audit[]> {
   const p = new URLSearchParams();
   if (visible !== "ALL") p.set("visible", visible);
-  const res = await fetch(`/api/ads-audit?${p}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/ads-audit?${p}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -62,7 +62,7 @@ export function ModeracaoView() {
 
   const setVisible = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: "approve" | "block" }) => {
-      const res = await fetch(`/api/ads-audit/${id}?action=${action}`, { method: "PATCH" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/ads-audit/${id}?action=${action}`, { method: "PATCH" });
       if (!res.ok) throw new Error("Falha");
     },
     onSuccess: (_, vars) => {
@@ -72,7 +72,7 @@ export function ModeracaoView() {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/ads-audit/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/ads-audit/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["ads-audit"] }); },
   });
 
@@ -166,7 +166,7 @@ function EditDialog({ audit, onClose, onSaved }: { audit: Audit; onClose: () => 
 
   async function submit(data: EditForm) {
     try {
-      const res = await fetch(`/api/ads-audit/${audit.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/ads-audit/${audit.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

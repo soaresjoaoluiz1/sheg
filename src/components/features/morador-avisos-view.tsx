@@ -18,7 +18,7 @@ type Notice = {
 };
 
 async function fetchNotices(): Promise<Notice[]> {
-  const res = await fetch("/api/morador/notices");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/morador/notices");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }

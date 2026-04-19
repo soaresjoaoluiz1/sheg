@@ -1,5 +1,5 @@
 export async function uploadDataUrl(dataUrl: string, subdir: string): Promise<string> {
-  const res = await fetch("/api/upload", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/upload", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ dataUrl, subdir }),

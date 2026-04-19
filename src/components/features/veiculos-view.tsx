@@ -55,13 +55,13 @@ type FormData = z.infer<typeof schema>;
 async function fetchVehicles(q: string): Promise<Vehicle[]> {
   const p = new URLSearchParams();
   if (q) p.set("q", q);
-  const res = await fetch(`/api/vehicles?${p}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/vehicles?${p}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
 
 async function fetchResidences(): Promise<Residence[]> {
-  const res = await fetch("/api/residences");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -76,7 +76,7 @@ export function VeiculosView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/vehicles/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/vehicles/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Falha");
     },
     onSuccess: () => { toast.success("Veículo removido"); qc.invalidateQueries({ queryKey: ["vehicles"] }); },

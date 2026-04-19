@@ -44,7 +44,7 @@ const bulkSchema = z.object({
 type BulkFormData = z.infer<typeof bulkSchema>;
 
 async function fetchResidences() {
-  const res = await fetch("/api/residences");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences");
   if (!res.ok) throw new Error("Falha ao carregar");
   return (await res.json()).items as Residence[];
 }
@@ -64,7 +64,7 @@ export function UnidadesView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/residences/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/residences/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha ao excluir");
     },
     onSuccess: () => {
@@ -265,7 +265,7 @@ function BulkDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () => 
           items.push({ block: data.block, number });
         }
       }
-      const res = await fetch("/api/residences/bulk", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences/bulk", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),

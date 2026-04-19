@@ -89,13 +89,13 @@ async function fetchPackages(status: string, q: string): Promise<Package[]> {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
   if (q) params.set("q", q);
-  const res = await fetch(`/api/packages?${params}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/packages?${params}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Package[];
 }
 
 async function fetchResidences(): Promise<Residence[]> {
-  const res = await fetch("/api/residences");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Residence[];
 }
@@ -121,7 +121,7 @@ export function EncomendasView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/packages/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/packages/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => {
@@ -133,7 +133,7 @@ export function EncomendasView() {
 
   const notify = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/packages/${id}/notify`, { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/packages/${id}/notify`, { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Falha");
       return json as { sent: number; preview: string };
@@ -147,7 +147,7 @@ export function EncomendasView() {
   });
 
   function copyLink(pkg: Package) {
-    const url = `${window.location.origin}/p/${pkg.id}`;
+    const url = `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/p/${pkg.id}`;
     navigator.clipboard.writeText(url);
     toast.success("Link copiado", { description: url });
   }
@@ -344,7 +344,7 @@ function CreatePackageDialog({ onClose, onSaved }: { onClose: () => void; onSave
     try {
       let photoUrl: string | null = null;
       if (photo) photoUrl = await uploadDataUrl(photo, "packages");
-      const res = await fetch("/api/packages", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/packages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -451,7 +451,7 @@ function DeliverDialog({
         return;
       }
       const photoUrl = await uploadDataUrl(photo, "packages");
-      const res = await fetch(`/api/packages/${pkg.id}/deliver`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/packages/${pkg.id}/deliver`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deliveredTo: data.deliveredTo, releasePhoto: photoUrl }),

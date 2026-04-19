@@ -51,7 +51,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 async function fetchNotices() {
-  const res = await fetch("/api/notices");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/notices");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Notice[];
 }
@@ -63,7 +63,7 @@ export function AvisosView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/notices/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/notices/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Falha");
     },
     onSuccess: () => {
@@ -152,7 +152,7 @@ function NoticeFormDialog({ onClose, onSaved }: { onClose: () => void; onSaved: 
     try {
       let photoUrl: string | null = null;
       if (photo) photoUrl = await uploadDataUrl(photo, "misc");
-      const res = await fetch("/api/notices", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/notices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

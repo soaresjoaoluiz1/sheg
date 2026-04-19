@@ -36,7 +36,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 async function fetchPins(): Promise<Pin[]> {
-  const res = await fetch("/api/map-pins");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/map-pins");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -48,13 +48,13 @@ export function MapaView() {
 
   const toggle = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      await fetch(`/api/map-pins/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/map-pins/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ active }) });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["map-pins"] }),
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/map-pins/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/map-pins/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["map-pins"] }); },
   });
 
@@ -126,7 +126,7 @@ function PinFormDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () 
 
   async function submit(data: FormData) {
     try {
-      const res = await fetch("/api/map-pins", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/map-pins", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ city: data.city, state: data.state.toUpperCase() }),

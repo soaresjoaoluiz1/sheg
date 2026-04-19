@@ -30,7 +30,7 @@ const TYPE = {
 async function fetchPackages(status: string): Promise<Pkg[]> {
   const p = new URLSearchParams();
   if (status !== "ALL") p.set("status", status);
-  const res = await fetch(`/api/morador/packages?${p}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/morador/packages?${p}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -42,7 +42,7 @@ export function MoradorEncomendasView() {
 
   const confirmPickup = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/morador/packages/${id}/confirm`, { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/morador/packages/${id}/confirm`, { method: "POST" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => { toast.success("Retirada confirmada!"); qc.invalidateQueries({ queryKey: ["morador-packages"] }); },

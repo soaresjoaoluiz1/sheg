@@ -53,7 +53,7 @@ const STATUS_VARIANTS: Record<Order["status"], "default" | "secondary" | "destru
 async function fetchOrders(status: string): Promise<Order[]> {
   const p = new URLSearchParams();
   if (status !== "ALL") p.set("status", status);
-  const res = await fetch(`/api/orders?${p}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/orders?${p}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -65,7 +65,7 @@ export function PedidosView() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, next }: { id: string; next: Order["status"] }) => {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/orders/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: next }),

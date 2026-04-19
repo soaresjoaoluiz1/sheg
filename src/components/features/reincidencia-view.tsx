@@ -20,7 +20,7 @@ type Group = {
 };
 
 async function fetchGroups(days: number): Promise<{ groups: Group[]; days: number }> {
-  const res = await fetch(`/api/occurrences/reincidence?days=${days}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences/reincidence?days=${days}`);
   if (!res.ok) throw new Error("Falha");
   return await res.json();
 }

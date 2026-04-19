@@ -20,6 +20,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
     image: shegou:latest
     restart: unless-stopped
     depends_on:
@@ -30,8 +32,9 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       UPLOADS_DIR: /app/public/uploads
-      UPLOADS_PUBLIC_PATH: /uploads
+      UPLOADS_PUBLIC_PATH: ${NEXT_PUBLIC_BASE_PATH:-}/uploads
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+      NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
       EVOLUTION_BASE_URL: ${EVOLUTION_BASE_URL:-}
       EVOLUTION_API_KEY: ${EVOLUTION_API_KEY:-}
     volumes:
@@ -39,10 +42,11 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=shegou-net
-      - traefik.http.routers.shegou.rule=Host(`${APP_DOMAIN}`)
+      - traefik.http.routers.shegou.rule=Host(`${APP_DOMAIN}`) && PathPrefix(`${NEXT_PUBLIC_BASE_PATH:-/shegou}`)
       - traefik.http.routers.shegou.entrypoints=websecure
       - traefik.http.routers.shegou.tls=true
       - traefik.http.routers.shegou.tls.certresolver=letsencrypt
+      - traefik.http.routers.shegou.priority=100
       - traefik.http.services.shegou.loadbalancer.server.port=3000
     networks:
       - shegou-net

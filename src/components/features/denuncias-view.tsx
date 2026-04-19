@@ -74,7 +74,7 @@ const STATUS: Record<Complaint["status"], { label: string; variant: "default" | 
 async function fetchComplaints(status: string): Promise<Complaint[]> {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
-  const res = await fetch(`/api/complaints?${params}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/complaints?${params}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Complaint[];
 }
@@ -92,7 +92,7 @@ export function DenunciasView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/complaints/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/complaints/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Falha");
     },
     onSuccess: () => {
@@ -103,7 +103,7 @@ export function DenunciasView() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, nextStatus }: { id: string; nextStatus: Complaint["status"] }) => {
-      const res = await fetch(`/api/complaints/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/complaints/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
@@ -267,7 +267,7 @@ function CreateDialog({ onClose, onSaved }: { onClose: () => void; onSaved: () =
     try {
       let photoUrl: string | null = null;
       if (photo) photoUrl = await uploadDataUrl(photo, "misc");
-      const res = await fetch("/api/complaints", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/complaints", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, photoUrl }),
@@ -378,7 +378,7 @@ function NotesDialog({
   async function submit() {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/complaints/${complaint.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/complaints/${complaint.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, adminNotes: notes || null }),

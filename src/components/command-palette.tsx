@@ -69,7 +69,7 @@ export function CommandPalette({ isMaster }: CommandPaletteProps) {
 
   async function logout() {
     setOpen(false);
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/auth/logout", { method: "POST" });
     router.push("/login");
     router.refresh();
   }

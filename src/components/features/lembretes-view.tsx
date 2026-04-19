@@ -34,14 +34,14 @@ const DEFAULT: Config = {
 };
 
 async function fetchConfig() {
-  const res = await fetch("/api/settings?key=package_stale_reminders");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/settings?key=package_stale_reminders");
   if (!res.ok) throw new Error("Falha");
   const json = await res.json();
   return (json.value as Config) ?? DEFAULT;
 }
 
 async function saveConfig(value: Config) {
-  const res = await fetch("/api/settings", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/settings", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ key: "package_stale_reminders", value }),
@@ -71,7 +71,7 @@ export function LembretesView() {
 
   const runNow = useMutation({
     mutationFn: async () => {
-      const res = await fetch("/api/cron/reminders", { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/cron/reminders", { method: "POST" });
       return await res.json();
     },
     onSuccess: (data) => {

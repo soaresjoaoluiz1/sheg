@@ -37,7 +37,7 @@ interface MarketResponse {
 }
 
 async function fetchMarket(): Promise<MarketResponse> {
-  const res = await fetch("/api/morador/marketplace");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/morador/marketplace");
   if (!res.ok) throw new Error("Falha");
   return await res.json();
 }
@@ -139,7 +139,7 @@ function ShopDialog({ shop, onClose }: { shop: Advertiser; onClose: () => void }
         quantity: i.qty,
         itemTotal: i.subtotal,
       }));
-      const res = await fetch("/api/morador/orders", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/morador/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

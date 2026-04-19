@@ -49,13 +49,13 @@ const createSchema = z.object({
 type CreateForm = z.infer<typeof createSchema>;
 
 async function fetchUsers(): Promise<AdminUser[]> {
-  const res = await fetch("/api/admin-users");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/admin-users");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
 
 async function fetchCondos(): Promise<Condo[]> {
-  const res = await fetch("/api/condominiums");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/condominiums");
   if (!res.ok) return [];
   const json = await res.json();
   return json.items ?? [];
@@ -78,7 +78,7 @@ export function UsuariosView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/admin-users/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/admin-users/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => { toast.success("Usuário removido"); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
@@ -259,7 +259,7 @@ function CondoLinkDialog({ user, onClose, onSaved }: { user: AdminUser; onClose:
   async function save() {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/admin-users/${user.id}/condominiums`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/admin-users/${user.id}/condominiums`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ condoIds: Array.from(selected) }),

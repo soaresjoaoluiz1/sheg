@@ -19,7 +19,7 @@ import { generateDeliveriesPDF, type DeliveryReport } from "@/lib/deliveries-pdf
 type Condo = { id: string; name: string };
 
 async function fetchCondos(): Promise<Condo[]> {
-  const res = await fetch("/api/condominiums");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/condominiums");
   if (!res.ok) return [];
   return (await res.json()).items;
 }
@@ -43,7 +43,7 @@ export function RelatoriosView() {
     setLoading(true);
     try {
       const params = new URLSearchParams({ condoId, from, to });
-      const res = await fetch(`/api/reports/deliveries?${params}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/reports/deliveries?${params}`);
       if (!res.ok) throw new Error("Falha");
       const json = (await res.json()) as DeliveryReport;
       setPreview(json);

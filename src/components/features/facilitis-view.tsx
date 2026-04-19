@@ -88,13 +88,13 @@ type CollabForm = z.infer<typeof collabSchema>;
 async function fetchServices(status: string): Promise<Service[]> {
   const p = new URLSearchParams();
   if (status !== "ALL") p.set("status", status);
-  const res = await fetch(`/api/facilitis/services?${p}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/facilitis/services?${p}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
 
 async function fetchCollabs(): Promise<Collaborator[]> {
-  const res = await fetch("/api/facilitis/collaborators");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/facilitis/collaborators");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -151,13 +151,13 @@ function AgendaTab() {
   const { data: items = [], isLoading } = useQuery({ queryKey: ["facilitis-services", status], queryFn: () => fetchServices(status) });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/facilitis/services/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/facilitis/services/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["facilitis-services"] }); },
   });
 
   const advance = useMutation({
     mutationFn: async ({ id, next }: { id: string; next: string }) => {
-      await fetch(`/api/facilitis/services/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next }) });
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/facilitis/services/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status: next }) });
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["facilitis-services"] }),
   });
@@ -309,7 +309,7 @@ function CollabTab() {
   const { data: items = [], isLoading } = useQuery({ queryKey: ["facilitis-collabs"], queryFn: fetchCollabs });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/facilitis/collaborators/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/facilitis/collaborators/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["facilitis-collabs"] }); },
   });
 

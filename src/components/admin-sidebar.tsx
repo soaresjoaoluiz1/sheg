@@ -93,7 +93,7 @@ const SECTIONS: NavSection[] = [
 ];
 
 async function fetchCounts(): Promise<CountsResponse> {
-  const res = await fetch("/api/dashboard/counts");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/dashboard/counts");
   if (!res.ok) throw new Error("Falha");
   return await res.json();
 }

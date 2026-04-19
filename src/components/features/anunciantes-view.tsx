@@ -94,13 +94,13 @@ const productSchema = z.object({
 type ProductForm = z.infer<typeof productSchema>;
 
 async function fetchCategories(): Promise<Category[]> {
-  const res = await fetch("/api/ad-categories");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/ad-categories");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
 
 async function fetchAdvertisers(): Promise<Advertiser[]> {
-  const res = await fetch("/api/advertisers");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/advertisers");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -125,7 +125,7 @@ function CategoriesTab() {
   const { data: items = [], isLoading } = useQuery({ queryKey: ["ad-categories"], queryFn: fetchCategories });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/ad-categories/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/ad-categories/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["ad-categories"] }); },
   });
 
@@ -231,13 +231,13 @@ function AdvertisersTab() {
   const { data: items = [], isLoading } = useQuery({ queryKey: ["advertisers"], queryFn: fetchAdvertisers });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/advertisers/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/advertisers/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["advertisers"] }); },
   });
 
   const toggle = useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
-      await fetch(`/api/advertisers/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/advertisers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ active }),
@@ -465,7 +465,7 @@ function ProductsDialog({ advertiser, onClose, onSaved }: { advertiser: Advertis
 
   async function submit(data: ProductForm) {
     try {
-      const res = await fetch("/api/advertiser-products", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/advertiser-products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -484,7 +484,7 @@ function ProductsDialog({ advertiser, onClose, onSaved }: { advertiser: Advertis
   }
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/advertiser-products/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/advertiser-products/${id}`, { method: "DELETE" }); },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["advertisers"] }); onSaved(); },
   });
 

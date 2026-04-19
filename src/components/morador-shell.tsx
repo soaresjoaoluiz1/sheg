@@ -32,7 +32,7 @@ export function MoradorShell({
   const router = useRouter();
 
   async function logout() {
-    await fetch("/api/morador/auth/logout", { method: "POST" });
+    await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/morador/auth/logout", { method: "POST" });
     toast.success("Sessão encerrada");
     router.push("/morador/login");
     router.refresh();

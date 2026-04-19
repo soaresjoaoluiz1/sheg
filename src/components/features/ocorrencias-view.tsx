@@ -90,19 +90,19 @@ const STATUS_LABELS = {
 async function fetchOccurrences(status: string) {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
-  const res = await fetch(`/api/occurrences?${params}`);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences?${params}`);
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Occurrence[];
 }
 
 async function fetchResidences(): Promise<Residence[]> {
-  const res = await fetch("/api/residences");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/residences");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items as Residence[];
 }
 
 async function fetchCondoName(): Promise<string | null> {
-  const res = await fetch("/api/auth/me");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/auth/me");
   if (!res.ok) return null;
   return null;
 }
@@ -130,7 +130,7 @@ export function OcorrenciasView() {
 
   const del = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/occurrences/${id}`, { method: "DELETE" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error ?? "Falha");
     },
     onSuccess: () => {
@@ -141,7 +141,7 @@ export function OcorrenciasView() {
 
   const notify = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`/api/occurrences/${id}/notify`, { method: "POST" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences/${id}/notify`, { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Falha");
       return json as { enqueued: number; protocol: string };
@@ -157,7 +157,7 @@ export function OcorrenciasView() {
 
   const advance = useMutation({
     mutationFn: async ({ id, nextStatus }: { id: string; nextStatus: string }) => {
-      const res = await fetch(`/api/occurrences/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: nextStatus }),
@@ -366,7 +366,7 @@ function OccurrenceFormDialog({ onClose, onSaved }: { onClose: () => void; onSav
     try {
       let photoUrl: string | null = null;
       if (photo) photoUrl = await uploadDataUrl(photo, "occurrences");
-      const res = await fetch("/api/occurrences", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/occurrences", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -473,7 +473,7 @@ function ResolveDialog({
   async function submit() {
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/occurrences/${oc.id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/occurrences/${oc.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "RESOLVED", adminResponse: response || null }),

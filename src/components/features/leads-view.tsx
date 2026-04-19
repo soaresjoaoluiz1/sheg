@@ -65,7 +65,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 async function fetchLeads(): Promise<Lead[]> {
-  const res = await fetch("/api/leads");
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}`+"/api/leads");
   if (!res.ok) throw new Error("Falha");
   return (await res.json()).items;
 }
@@ -87,7 +87,7 @@ export function LeadsView() {
 
   const move = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: Lead["stage"] }) => {
-      await fetch(`/api/leads/${id}`, {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/leads/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage }),
@@ -97,7 +97,7 @@ export function LeadsView() {
   });
 
   const del = useMutation({
-    mutationFn: async (id: string) => { await fetch(`/api/leads/${id}`, { method: "DELETE" }); },
+    mutationFn: async (id: string) => { await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/leads/${id}`, { method: "DELETE" }); },
     onSuccess: () => { toast.success("Removido"); qc.invalidateQueries({ queryKey: ["leads"] }); },
   });
 
@@ -107,7 +107,7 @@ export function LeadsView() {
         <Button onClick={() => setCreating(true)} className="gap-2">
           <Plus className="size-3.5" aria-hidden /> Novo lead
         </Button>
-        <a href="/api/leads/export" className="inline-flex items-center gap-2 text-sm rounded-md border bg-background hover:bg-muted px-3 h-7 transition-colors">
+        <a href={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/leads/export`} className="inline-flex items-center gap-2 text-sm rounded-md border bg-background hover:bg-muted px-3 h-7 transition-colors">
           <FileDown className="size-3.5" aria-hidden /> Exportar CSV
         </a>
         <span className="text-sm text-muted-foreground ml-auto">
