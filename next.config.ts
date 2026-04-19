@@ -4,7 +4,6 @@ import path from "node:path";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
   turbopack: {
