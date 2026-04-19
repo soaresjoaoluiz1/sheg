@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -18,6 +18,14 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function MoradorLoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <MoradorLoginForm />
+    </Suspense>
+  );
+}
+
+function MoradorLoginForm() {
   const router = useRouter();
   const search = useSearchParams();
   const next = search.get("next") ?? "/morador";
